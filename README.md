@@ -36,6 +36,8 @@ long-term statistics of the **total energy** sensor and split by the tariff hour
 (`number.*_t1_start_hour` / `t1_end_hour`, default 07–23). The periods therefore always
 add up to the meter itself. The cumulative T1/T2 counters are shown as the meter's tariff
 package reports them; if their sum differs from the meter by more than 1 %, the card says so.
+When T1/T2 are seeded from the utility's two-rate meter (so they will never add up to this
+meter), set `tariff_check: false`.
 
 Statistics need the recorder and `state_class: total_increasing` on the total energy sensor.
 
@@ -54,6 +56,7 @@ breaker: 40             # gauge scale, A; default: the meter's overcurrent thres
 inverter: pi30_6200     # optional, eybond_local prefix for the balance in Statistics
 stale_after: 120        # seconds without a voltage update before values are stale
 show_controls: true     # Settings button
+tariff_check: true      # warn when T1 + T2 differ from the meter (off if seeded from the utility meter)
 theme: auto             # auto | light | dark
 entities:               # optional per-entity overrides
   total: sensor.cb2s_total_energy

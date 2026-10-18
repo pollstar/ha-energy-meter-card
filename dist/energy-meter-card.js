@@ -14,6 +14,8 @@
  *   stale_after: 120         # optional, seconds without a voltage update
  *                            # before values are shown as stale
  *   show_controls: true      # optional, Settings button
+ *   tariff_check: true       # warn when T1 + T2 differ from the meter; turn off
+ *                            # when T1/T2 are seeded from the utility meter
  *   theme: auto              # auto | light | dark
  *   entities:                # optional overrides, any key of DEFAULTS below
  *     total: sensor.my_meter_energy
@@ -27,7 +29,7 @@
  * Vanilla JS, no dependencies.
  */
 
-const CARD_VERSION = "0.1.0";
+const CARD_VERSION = "0.1.1";
 
 // key -> [domain, object-id suffix]; full entity ids may be overridden in config.entities
 const DEFAULTS = {
@@ -325,7 +327,7 @@ class EnergyMeterCard extends HTMLElement {
   }
 
   setConfig(config) {
-    this._config = { show_controls: true, stale_after: 120, ...(config || {}) };
+    this._config = { show_controls: true, stale_after: 120, tariff_check: true, ...(config || {}) };
     const theme = ["light", "dark"].includes(this._config.theme) ? this._config.theme : "auto";
     this.setAttribute("data-theme", theme);
     this._prefix = this._config.device || null;
@@ -612,7 +614,8 @@ class EnergyMeterCard extends HTMLElement {
     root.querySelector(".tile.t1").classList.toggle("on", t1now);
     root.querySelector(".tile.t2").classList.toggle("on", !t1now);
     const mm = root.querySelector("[data-mm]");
-    const mismatch = total && c1 !== null && c2 !== null ? Math.abs(c1 + c2 - total) / total * 100 : 0;
+    const mismatch = this._config.tariff_check !== false && total && c1 !== null && c2 !== null
+      ? Math.abs(c1 + c2 - total) / total * 100 : 0;
     mm.hidden = mismatch <= 1;
     if (!mm.hidden) mm.textContent = this._tpl(t.mismatch, { p: this._fmt(mismatch, mismatch >= 10 ? 0 : 1) });
 
